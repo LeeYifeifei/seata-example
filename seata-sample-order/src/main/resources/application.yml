@@ -1,0 +1,35 @@
+server:
+  port: 9091
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/seata_order?characterEncoding=utf8
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+    password: 123456
+#    schema: classpath:db/schema-order.sql  # 配置则生效,自动初始化表结构
+
+seata:
+  enabled: true
+  application-id: applicationName
+  tx-service-group: my_test_tx_group
+  service:
+    vgroup-mapping:
+      #key与上面的tx-service-group的值对应
+      my_test_tx_group: default
+    grouplist:
+      #seata-server地址仅file注册中心需要
+      default: 127.0.0.1:8091
+  config:
+    type: file
+  registry:
+    type: file
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:10086/eureka  # 注册中心默认地址
+  instance:
+    preferIpAddress: true #使用ip地址向服务中心注册

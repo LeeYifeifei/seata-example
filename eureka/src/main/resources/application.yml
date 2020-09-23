@@ -1,0 +1,17 @@
+server:
+  port: 10086
+spring:
+  application:
+    name: eureka
+
+eureka:
+  client:
+    fetch-registry: false   # 是否从Eureka Server获取注册信息，默认为true。如果这是一个单点的Eureka Server，不需要同步其他节点的数据，可以设为false。
+    register-with-eureka: false   # 是否将自己注册到Eureka Server
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka   # Eureka Server的地址，现在是自己的地址，如果是集群，需要写其它Server的地址。
+  instance:
+    hostname: localhost
+  server:
+    enable-self-preservation: false   # 是否使用eureka的自我保护机制
+
