@@ -29,7 +29,10 @@ seata:
   config:
     type: file
   registry:
-    type: file
+#    type: file
+    eureka:
+#      weight: 1
+      service-url: http://localhost:10086/eureka
 
 eureka:
   client:

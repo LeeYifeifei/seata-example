@@ -10,6 +10,10 @@ spring:
     username: root
     password: 123456
 #    schema: classpath:db/schema-account.sql  # 配置则生效,自动初始化表结构
+#  cloud:
+#    alibaba:
+#      seata:
+#        tx-service-group: my_test_tx_group
 
 seata:
   enabled: true
@@ -25,7 +29,10 @@ seata:
   config:
     type: file
   registry:
-    type: file
+#    type: file
+    eureka:
+#      weight: 1
+      service-url: http://localhost:10086/eureka
 
 eureka:
   client:
