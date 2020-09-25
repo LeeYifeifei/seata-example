@@ -1,0 +1,115 @@
+# Seata client端 配置详解
+
+seata:
+  enabled: true   #是否开启spring-boot自动装配  true、false,(SSBS)专有配置，默认true（附录4）
+  application-id: applicationName
+  tx-service-group: my_test_tx_group
+  enable-auto-data-source-proxy: true   #是否开启数据源自动代理  true、false,seata-spring-boot-starter(SSBS)专有配置,SSBS默认会开启数据源自动代理,可通过该配置项关闭.
+  use-jdk-proxy: false  #是否使用JDK代理作为数据源自动代理的实现方式 true、false,(SSBS)专有配置,默认false,采用CGLIB作为数据源自动代理的实现方式
+  excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
+  client:
+    rm:
+      async-commit-buffer-limit: 1000 #异步提交缓存队列长度  默认10000。二阶段提交成功，RM异步清理undo队列
+      report-retry-count: 5   #一阶段结果上报TC重试次数 默认5次
+      table-meta-check-enable: false  #自动刷新缓存中的表结构  默认false
+      report-success-enable: false  #是否上报一阶段成功  true、false，从1.1.0版本开始,默认false.true用于保持分支事务生命周期记录完整，false可提高不少性能
+      saga-branch-register-enable: false
+      lock:
+        retry-interval: 10  #校验或占用全局锁重试间隔  默认10，单位毫秒
+        retry-times: 30   #校验或占用全局锁重试次数  默认30
+        retry-policy-branch-rollback-on-conflict: true  #分支事务与其它全局回滚事务冲突时锁策略  默认true，优先释放本地锁让回滚成功
+    tm:
+      degrade-check: false  #降级开关  默认false。业务侧根据连续错误数自动降级不走seata事务(详细介绍请阅读附录6)
+      degrade-check-period: 2000  #服务自检周期  默认2000,单位ms.每2秒进行一次服务自检,来决定
+      degrade-check-allow-times: 10 #升降级达标阈值  默认10
+      commit-retry-count: 5   #一阶段全局提交结果上报TC重试次数  默认1次，建议大于1
+      rollback-retry-count: 5   #一阶段全局回滚结果上报TC重试次数  默认1次，建议大于1
+    undo:
+      data-validation: true   #二阶段回滚镜像校验  默认true开启，false关闭
+      log-serialization: jackson    #undo序列化方式  默认jackson
+      log-table: undo_log   #自定义undo表名  默认undo_log
+      only-care-update-columns: true
+    log:
+      exceptionRate: 100  #日志异常输出概率  默认100，目前用于undo回滚失败时异常堆栈输出，百分之一的概率输出，回滚失败基本是脏数据，无需输出堆栈占用硬盘空间
+  service:
+    vgroup-mapping:
+      my_test_tx_group: default #事务群组（附录1）  my_test_tx_group为分组，配置项值为TC集群名
+    grouplist:
+      default: 127.0.0.1:8091   #TC服务列表（附录2）	仅注册中心为file时使用   由于spring-boot本身配置文件语法的要求,这个地方需要将file.conf中的default.grouplist写成grouplist.default,效果是一样的.
+    enable-degrade: false
+    disable-global-transaction: false #全局事务开关  默认false。false为开启，true为关闭
+  transport:
+    shutdown:
+      wait: 3
+    thread-factory:
+      boss-thread-prefix: NettyBoss
+      worker-thread-prefix: NettyServerNIOWorker
+      server-executor-thread-prefix: NettyServerBizHandler
+      share-boss-worker: false
+      client-selector-thread-prefix: NettyClientSelector
+      client-selector-thread-size: 1
+      client-worker-thread-prefix: NettyClientWorkerThread
+      worker-thread-size: default
+      boss-thread-size: 1
+    type: TCP
+    server: NIO
+    heartbeat: true   #client和server通信心跳检测开关  默认true开启
+    serialization: seata  #client和server通信编解码方式  seata（ByteBuf）、protobuf、kryo、hession，默认seata
+    compressor: none  #client和server通信数据压缩方式  none、gzip，默认none
+    enable-client-batch-send-request: true  #客户端事务消息请求是否批量合并发送  默认true，false单条发送
+  config:
+    type: file  #配置中心类型  默认file，支持file、nacos 、apollo、zk、consul、etcd3、custom
+    consul:
+      server-addr: 127.0.0.1:8500
+    apollo:
+      apollo-meta: http://192.168.1.204:8801
+      app-id: seata-server
+      namespace: application
+    etcd3:
+      server-addr: http://localhost:2379
+    nacos:
+      namespace:
+      serverAddr: 127.0.0.1:8848
+      group: SEATA_GROUP
+      username: ""
+      password: ""
+    zk:
+      server-addr: 127.0.0.1:2181
+      session-timeout: 6000
+      connect-timeout: 2000
+      username: ""
+      password: ""
+  registry:
+    type: file  #注册中心类型   默认file，支持file 、nacos 、eureka、redis、zk、consul、etcd3、sofa、custom
+    consul:
+      server-addr: 127.0.0.1:8500
+    etcd3:
+      serverAddr: http://localhost:2379
+    eureka:
+      weight: 1
+      service-url: http://localhost:8761/eureka
+    nacos:
+      application: seata-server
+      server-addr: 127.0.0.1:8848
+      group : "SEATA_GROUP"
+      namespace:
+      username: ""
+      password: ""
+    redis:
+      server-addr: localhost:6379
+      db: 0
+      password:
+      timeout: 0
+    sofa:
+      server-addr: 127.0.0.1:9603
+      region: DEFAULT_ZONE
+      datacenter: DefaultDataCenter
+      group: SEATA_GROUP
+      addressWaitTime: 3000
+      application: default
+    zk:
+      server-addr: 127.0.0.1:2181
+      session-timeout: 6000
+      connect-timeout: 2000
+      username: ""
+      password: ""
